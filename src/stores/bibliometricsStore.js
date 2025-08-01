@@ -227,13 +227,14 @@ export const useBibliometricsStore = defineStore('bibliometrics', () => {
         return
       }
       // 控制台调试输出
-      console.log('[bibliometricsStore] 开始加载 CSV: /csv/bibliometrics_data.csv')
-      const loadedData = await fetchCSV('/csv/bibliometrics_data.csv')
+      // 控制台调试输出
+      const csvPath = import.meta.env.BASE_URL + 'csv/bibliometrics_data.csv'
+      console.log('[bibliometricsStore] 开始加载 CSV:', csvPath)
+      const loadedData = await fetchCSV(csvPath)
       console.log('[bibliometricsStore] 加载完成，记录数:', loadedData.length)
       if (loadedData.length === 0) {
-        console.warn('[bibliometricsStore] 加载到的数据为空，请检查 public/csv/bibliometrics_data.csv 是否存在且格式正确')
+        console.warn('[bibliometricsStore] 加载到的数据为空，请检查 csv 目录下 bibliometrics_data.csv 是否存在且格式正确')
       }
-
       // 字段映射表：左为CSV可能出现的字段，右为代码标准字段
       const FIELD_MAP = {
         'Article_Date': 'article_date',
