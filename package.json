@@ -1,5 +1,5 @@
 {
-  "name": "plotlysite", 
+  "name": "plotlysite",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -13,6 +13,7 @@
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
+    "@heroicons/vue": "^2.2.0",
     "lodash": "^4.17.21",
     "papaparse": "^5.5.3",
     "pinia": "^3.0.3",

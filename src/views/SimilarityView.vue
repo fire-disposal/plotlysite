@@ -12,9 +12,7 @@
 
     <!-- 无数据状态 -->
     <div v-if="!hasData" class="alert alert-warning">
-      <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-      </svg>
+      <ExclamationTriangleIcon class="shrink-0 h-6 w-6 text-warning" />
       <span>请先加载数据以开始相似性搜索</span>
     </div>
 
@@ -22,9 +20,7 @@
     <div v-if="hasData" class="card bg-base-100 shadow-xl">
       <div class="card-body">
         <h2 class="card-title">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
+          <MagnifyingGlassIcon class="h-6 w-6" />
           搜索设置
         </h2>
         
@@ -124,9 +120,7 @@
         <div class="card bg-base-100 shadow-xl">
           <div class="card-body">
             <h2 class="card-title">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
+              <ChartBarIcon class="h-6 w-6" />
               相似性分数分布
             </h2>
             <PlotlyChart
@@ -140,9 +134,7 @@
         <div class="card bg-base-100 shadow-xl">
           <div class="card-body">
             <h2 class="card-title">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
-              </svg>
+              <ArrowTrendingUpIcon class="h-6 w-6" />
               性能对比散点图
             </h2>
             <PlotlyChart
@@ -158,9 +150,7 @@
       <div class="card bg-base-100 shadow-xl">
         <div class="card-body">
           <h2 class="card-title">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-            </svg>
+            <DocumentChartBarIcon class="h-6 w-6" />
             相似论文排名
             <div class="badge badge-primary ml-2">{{ similarPapers.length }} 篇</div>
           </h2>
@@ -238,18 +228,14 @@
                       @click="selectAsSeed(paper)"
                       title="作为新的搜索目标"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
+                      <MagnifyingGlassIcon class="h-3 w-3" />
                     </button>
                     <button 
                       class="btn btn-ghost btn-xs"
                       @click="comparePapers(paper)"
                       title="详细对比"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 4h6m-6 4h6m-6 4h6" />
-                      </svg>
+                      <DocumentChartBarIcon class="h-3 w-3" />
                     </button>
                   </div>
                 </div>
@@ -263,9 +249,7 @@
       <div class="card bg-base-100 shadow-xl">
         <div class="card-body">
           <h2 class="card-title">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-            </svg>
+            <SunIcon class="h-6 w-6" />
             搜索洞察
           </h2>
           
@@ -290,9 +274,7 @@
           </div>
           
           <div class="alert alert-info mt-4">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
+            <ChartBarIcon class="shrink-0 w-6 h-6 text-info" />
             <div>
               <h3 class="font-bold">研究建议</h3>
               <div class="text-sm">{{ researchSuggestion }}</div>
@@ -309,6 +291,14 @@ import { computed, ref, watch, onMounted } from 'vue'
 import { useBibliometricsStore } from '../stores/bibliometricsStore'
 import { useGlobalStateStore } from '../stores/globalStateManager'
 import PlotlyChart from '../components/PlotlyChart.vue'
+import {
+  ExclamationTriangleIcon,
+  MagnifyingGlassIcon,
+  ChartBarIcon,
+  ArrowTrendingUpIcon,
+  DocumentChartBarIcon,
+  SunIcon
+} from '@heroicons/vue/24/outline'
 
 const bibliometricsStore = useBibliometricsStore()
 const globalStateManager = useGlobalStateStore()

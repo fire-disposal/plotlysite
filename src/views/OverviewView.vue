@@ -25,7 +25,6 @@
           <StatCard class="flex-1 min-w-[140px] border-r last:border-r-0" title="Total journals" :value="availableYears?.length ?? 0" icon="📚"/>
           <StatCard class="flex-1 min-w-[140px] border-r last:border-r-0" title="Authors" :value="availableCancerTypes?.length ?? 0" icon="👨‍🔬"/>
           <StatCard class="flex-1 min-w-[140px] border-r last:border-r-0" title="Countries" :value="availableNetworkTypes?.length ?? 0" icon="🌍"/>
-          <StatCard class="flex-1 min-w-[140px] border-r last:border-r-0" title="Total models" :value="availableTaskTypes?.length ?? 0" icon="🧠"/>
           <StatCard class="flex-1 min-w-[140px]" title="Updated on" :value="updatedDate || ''" icon="🕒"/>
         </div>
         <!-- 图表区（全局store数据） -->
@@ -152,17 +151,6 @@ watch(() => store.data, async (val) => {
 const availableYears = computed(() => statistics.value.years?.length || 0)
 const availableCancerTypes = computed(() => statistics.value.cancerTypes?.length || 0)
 const availableNetworkTypes = computed(() => statistics.value.networkTypes?.length || 0)
-const availableTaskTypes = computed(() => statistics.value.taskTypes?.length || 0)
-
-const updatedDate = computed(() => {
-  const ts = statistics.value.lastUpdated
-  if (!ts) return ''
-  try {
-    return new Date(ts).toLocaleString('zh-CN')
-  } catch {
-    return ts
-  }
-})
 
 // 图表数据 - 使用统一的图表服务
 import { ref } from 'vue'
@@ -197,10 +185,6 @@ const qualityIndexData = ref([])
 const qualityIndexLayout = ref([])
 const qualityIndexParamData = ref([])
 const qualityIndexParamLayout = ref([])
-
-
-// 类别标签数据 - 简化处理
-/* 已由 ref 统一声明 classLabelData/classLabelLayout，移除 computed 版本 */
 
 // 空数据占位符（用于未实现的图表）
 const emptyData = []
