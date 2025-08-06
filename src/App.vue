@@ -26,37 +26,37 @@
     <ErrorModal
       :show="!!errorMessage"
       :message="errorMessage"
-      @close="bibliometricsStore.error = null"
+      @close="biblio.error = null"
     />
     
     <!-- 状态监控组件 (开发模式下可见) -->
-    <StateMonitor />
+    <!-- <StateMonitor /> -->
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useBibliometricsStore } from './stores/bibliometricsStore'
+import { useBiblio } from './stores/biblioStore'
 // 组件导入
 import Navbar from './components/Navbar.vue'
 import LoadingModal from './components/LoadingModal.vue'
 import ErrorModal from './components/ErrorModal.vue'
 
 const router = useRouter()
-const bibliometricsStore = useBibliometricsStore()
+const biblio = useBiblio()
 /**
  * 只依赖 bibliometricsStore，移除 globalStateManager 相关逻辑
  */
 
 // 计算属性
-const isLoading = computed(() => bibliometricsStore.loading)
-const errorMessage = computed(() => bibliometricsStore.error)
+const isLoading = computed(() => biblio.loading)
+const errorMessage = computed(() => biblio.error)
 
 // 生命周期钩子
 onMounted(async () => {
-  if (bibliometricsStore.data.length === 0) {
-    await bibliometricsStore.loadData()
+  if (biblio.data.length === 0) {
+    await biblio.loadData()
   }
 })
 </script>

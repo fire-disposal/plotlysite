@@ -7,12 +7,9 @@
           <Bars3Icon class="h-5 w-5" />
         </div>
         <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+          <li><RouterLink to="/about" class="w-full text-left">平台介绍</RouterLink></li>
           <li><RouterLink to="/overview" class="w-full text-left">数据概览</RouterLink></li>
           <li><RouterLink to="/filters" class="w-full text-left">多维筛选</RouterLink></li>
-          <li><RouterLink to="/charts" class="w-full text-left">图表分析</RouterLink></li>
-          <li><RouterLink to="/features" class="w-full text-left">特征分析</RouterLink></li>
-          <li><RouterLink to="/quality" class="w-full text-left">质量评估</RouterLink></li>
-          <li><RouterLink to="/similarity" class="w-full text-left">相似性搜索</RouterLink></li>
         </ul>
       </div>
       
@@ -32,6 +29,15 @@
       <ul class="menu menu-horizontal px-1">
         <li>
           <RouterLink
+            to="/about"
+            class="flex items-center gap-2"
+          >
+            <AcademicCapIcon class="h-4 w-4" />
+            平台介绍
+          </RouterLink>
+        </li>
+        <li>
+          <RouterLink
             to="/overview"
             class="flex items-center gap-2"
           >
@@ -47,28 +53,6 @@
             <AdjustmentsHorizontalIcon class="h-4 w-4" />
             多维筛选
           </RouterLink>
-        </li>
-        <li>
-          <RouterLink
-            to="/charts"
-            class="flex items-center gap-2"
-          >
-            <ChartBarIcon class="h-4 w-4" />
-            图表分析
-          </RouterLink>
-        </li>
-        <li>
-          <div class="dropdown dropdown-bottom">
-            <button tabindex="0" role="button" class="flex items-center gap-2">
-              <BoltIcon class="h-4 w-4" />
-              高级分析
-            </button>
-            <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 z-10">
-              <li><RouterLink to="/features" class="w-full text-left">特征重要性</RouterLink></li>
-              <li><RouterLink to="/quality" class="w-full text-left">质量评估</RouterLink></li>
-              <li><RouterLink to="/similarity" class="w-full text-left">相似性搜索</RouterLink></li>
-            </ul>
-          </div>
         </li>
       </ul>
     </div>
@@ -128,26 +112,20 @@
   </Transition>
 
   <!-- 错误状态提示 -->
-  <div v-if="error" class="alert alert-error shadow-lg">
-    <ExclamationTriangleIcon class="shrink-0 h-6 w-6 text-error" />
-    <span>{{ error }}</span>
-    <div>
-      <button class="btn btn-sm btn-outline" @click="clearError">关闭</button>
-    </div>
-  </div>
+  <!-- 顶部报错弹窗已移除，统一由全局 ErrorModal 控制 -->
 </template>
 
 <script setup>
 import { computed } from 'vue'
-import { useBibliometricsStore } from '../stores/bibliometricsStore'
+import { useBiblio } from '../stores/biblioStore'
 import { ChartBarIcon, AdjustmentsHorizontalIcon, BoltIcon, Bars3Icon, AcademicCapIcon, ArrowPathIcon, MoonIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
 
-const bibliometricsStore = useBibliometricsStore()
+const biblio = useBiblio()
 
 // 计算属性
-const isLoading = computed(() => bibliometricsStore.loading)
-const error = computed(() => bibliometricsStore.error)
-const totalCount = computed(() => bibliometricsStore.data?.length || 0)
+const isLoading = computed(() => biblio.loading)
+const error = computed(() => biblio.error)
+const totalCount = computed(() => biblio.data?.length || 0)
 
 const dataStatus = computed(() => {
   if (isLoading.value) return '加载中'
@@ -165,11 +143,11 @@ const statusClass = computed(() => {
 
 // 方法
 const reloadData = async () => {
-  await bibliometricsStore.loadData()
+  await biblio.loadData()
 }
 
 const clearError = () => {
-  bibliometricsStore.error = null
+  biblio.error = null
 }
 
 const setTheme = (theme) => {

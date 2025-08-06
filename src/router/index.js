@@ -3,15 +3,21 @@ import { createRouter, createWebHistory } from 'vue-router'
 // 导入视图组件
 import OverviewView from '../views/OverviewView.vue'
 import FilterView from '../views/FilterView.vue'
-import ChartsView from '../views/ChartsView.vue'
-import FeatureAnalysisView from '../views/FeatureAnalysisView.vue'
-import QualityView from '../views/QualityView.vue'
-import SimilarityView from '../views/SimilarityView.vue'
+import AboutView from '../views/AboutView.vue'
 
 const routes = [
   {
     path: '/',
-    redirect: '/overview'
+    redirect: '/about'
+  },
+  {
+    path: '/about',
+    name: 'About',
+    component: AboutView,
+    meta: {
+      title: '平台介绍',
+      icon: 'AcademicCapIcon'
+    }
   },
   {
     path: '/overview',
@@ -31,42 +37,6 @@ const routes = [
       icon: 'AdjustmentsHorizontalIcon'
     }
   },
-  {
-    path: '/charts',
-    name: 'Charts',
-    component: ChartsView,
-    meta: {
-      title: '图表分析',
-      icon: 'ChartBarIcon'
-    }
-  },
-  {
-    path: '/features',
-    name: 'Features',
-    component: FeatureAnalysisView,
-    meta: {
-      title: '特征分析',
-      icon: 'BoltIcon'
-    }
-  },
-  {
-    path: '/quality',
-    name: 'Quality',
-    component: QualityView,
-    meta: {
-      title: '质量评估',
-      icon: 'StarIcon'
-    }
-  },
-  {
-    path: '/similarity',
-    name: 'Similarity',
-    component: SimilarityView,
-    meta: {
-      title: '相似性搜索',
-      icon: 'MagnifyingGlassIcon'
-    }
-  }
 ]
 
 const router = createRouter({

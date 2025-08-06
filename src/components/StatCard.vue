@@ -9,21 +9,9 @@
  
 <script setup>
 defineProps({
-  title: {
-    type: String,
-    required: true
-  },
-  value: {
-    type: [String, Number],
-    required: true
-  },
-  icon: {
-    type: String,
-    required: true
-  },
-  desc: {
-    type: String,
-    required: false
-  }
+  title: String,
+  value: [String, Number],
+  icon: String,
+  desc: String
 })
 </script>

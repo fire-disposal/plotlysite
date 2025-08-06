@@ -187,8 +187,7 @@
 
 <script setup>
 import { computed, ref, onMounted, watch } from "vue";
-import { useBibliometricsStore } from "../stores/bibliometricsStore";
-import { useGlobalStateStore } from "../stores/globalStateManager";
+import { useBiblio } from "../stores/biblioStore";
 import {
   TrashIcon,
   StarIcon,
@@ -202,8 +201,8 @@ import {
   EyeIcon
 } from "@heroicons/vue/24/outline";
 
-const bibliometricsStore = useBibliometricsStore();
-const globalStateManager = useGlobalStateStore();
+const biblio = useBiblio();
+
 
 onMounted(async () => {
   if (!globalStateManager.state.isInitialized) {
@@ -217,14 +216,29 @@ onMounted(async () => {
 const currentPage = ref(1);
 const pageSize = 15;
 
-const totalCount = computed(() => bibliometricsStore.data.length);
-const filteredCount = computed(() => bibliometricsStore.filteredData.length);
-const filters = computed(() => bibliometricsStore.filters);
-const networkTypes = computed(() => bibliometricsStore.availableNetworkTypes);
-const cancerTypes = computed(() => bibliometricsStore.availableCancerTypes);
-const dataCollectionTechniques = computed(
-  () => bibliometricsStore.availableDataCollectionTechniques
-);
+const totalCount = computed(() => biblio.data_count);
+
+const defaultFilters = () => ({
+  search: '',
+  networkType: [],
+  cancerType: [],
+  dataCollectionTech: [],
+  hasExternalValidation: null,
+  hasCodeAvailability: null,
+  hasDataAvailability: null,
+  performanceRange: [0, 1],
+  qualityScoreRange: [0, 7]
+});
+const filters = ref(defaultFilters());
+
+// 直接使用store的筛选结果
+const filteredList = computed(() => biblio.data_f);
+const filteredCount = computed(() => biblio.data_f_count);
+
+// 可选项直接从原始数据生成
+const networkTypes = computed(() => [...new Set(biblio.data.map(i => i.network_type).filter(Boolean))]);
+const cancerTypes = computed(() => [...new Set(biblio.data.map(i => i.cancer_type).filter(Boolean))]);
+const dataCollectionTechniques = computed(() => [...new Set(biblio.data.map(i => i.DataCollection_technique).filter(Boolean))]);
 
 const filterRate = computed(() => {
   return totalCount.value > 0 ? Math.round((filteredCount.value / totalCount.value) * 100) : 0;
@@ -247,58 +261,71 @@ const hasActiveFilters = computed(() => {
 const totalPages = computed(() => Math.ceil(filteredCount.value / pageSize));
 const paginatedResults = computed(() => {
   const start = (currentPage.value - 1) * pageSize;
-  return bibliometricsStore.filteredData.slice(start, start + pageSize);
+  return filteredList.value.slice(start, start + pageSize);
 });
 
+/**
+ * filters变化时自动应用筛选
+ */
 watch(filters, () => {
+  biblio.applyFilters(filters.value);
   currentPage.value = 1;
 }, { deep: true });
 
+/**
+ * 首次加载时也应用一次筛选
+ */
+onMounted(() => {
+  biblio.applyFilters(filters.value);
+});
+
 const toggleFilter = (filterType, value) => {
   if (filters.value[filterType].includes(value)) {
-    bibliometricsStore.removeFilter(filterType, value);
+    filters.value[filterType] = filters.value[filterType].filter(v => v !== value);
   } else {
-    bibliometricsStore.addFilter(filterType, value);
+    filters.value[filterType] = [...filters.value[filterType], value];
   }
 };
 
 const setFilter = (filterType, value) => {
-  value === null
-    ? bibliometricsStore.removeFilter(filterType, null)
-    : bibliometricsStore.addFilter(filterType, value);
+  filters.value[filterType] = value;
 };
 
 const removeFilter = (filterType, value) => {
-  bibliometricsStore.removeFilter(filterType, value);
+  if (Array.isArray(filters.value[filterType])) {
+    filters.value[filterType] = filters.value[filterType].filter(v => v !== value);
+  } else {
+    filters.value[filterType] = null;
+  }
 };
 
 const clearAllFilters = () => {
-  bibliometricsStore.clearFilters();
+  filters.value = defaultFilters();
 };
 
 const updatePerformanceRange = (value) => {
-  bibliometricsStore.setPerformanceRange([0, parseFloat(value)]);
+  filters.value.performanceRange = [0, parseFloat(value)];
 };
 
 const updateQualityRange = (value) => {
-  bibliometricsStore.setQualityScoreRange([0, parseInt(value)]);
+  filters.value.qualityScoreRange = [0, parseInt(value)];
 };
 
 const applyPreset = (presetType) => {
   clearAllFilters();
   switch (presetType) {
     case "highQuality":
-      bibliometricsStore.setQualityScoreRange([5, 7]);
+      filters.value.qualityScoreRange = [5, 7];
       break;
     case "highPerformance":
-      bibliometricsStore.setPerformanceRange([0.85, 1]);
+      filters.value.performanceRange = [0.85, 1];
       break;
     case "openData":
-      bibliometricsStore.addFilter("hasDataAvailability", true);
-      bibliometricsStore.addFilter("hasCodeAvailability", true);
+      filters.value.hasDataAvailability = true;
+      filters.value.hasCodeAvailability = true;
       break;
     case "recent":
-      // 你可以将 recent 相关过滤逻辑加入 store，例如用 filterYearRange
+      // 可扩展 recent 相关逻辑
       break;
   }
 };
