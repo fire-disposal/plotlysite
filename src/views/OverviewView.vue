@@ -33,6 +33,9 @@
         <!-- 图表区（全局store数据） -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <ChartTest1 />
+          <ChartTest2 />
+          <ChartTest3 />
+          <ChartTest4 />
         </div>
       </div>
     </template>
@@ -72,4 +75,7 @@ watch(() => store.data, (val) => {
 
 // 图表区直接插入各自负责数据的图表组件（示例，后续补充具体组件）
 import ChartTest1 from '../components/charts/charttest1.vue'
+import ChartTest2 from '../components/charts/charttest2.vue'
+import ChartTest3 from '../components/charts/charttest3.vue'
+import ChartTest4 from '../components/charts/charttest4.vue'
 </script>
