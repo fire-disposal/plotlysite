@@ -7,9 +7,9 @@
           <Bars3Icon class="h-5 w-5" />
         </div>
         <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
-          <li><RouterLink to="/about" class="w-full text-left">平台介绍</RouterLink></li>
-          <li><RouterLink to="/overview" class="w-full text-left">数据概览</RouterLink></li>
-          <li><RouterLink to="/filters" class="w-full text-left">多维筛选</RouterLink></li>
+          <li><RouterLink to="/about" class="w-full text-left">{{ t('nav.about') }}</RouterLink></li>
+          <li><RouterLink to="/overview" class="w-full text-left">{{ t('nav.overview') }}</RouterLink></li>
+          <li><RouterLink to="/filters" class="w-full text-left">{{ t('nav.filters') }}</RouterLink></li>
         </ul>
       </div>
       
@@ -20,7 +20,7 @@
             <AcademicCapIcon class="w-8 h-8 text-primary" />
           </div>
         </div>
-        <h1 class="text-xl font-bold text-base-content">文献计量学分析平台</h1>
+        <h1 class="text-xl font-bold text-base-content">{{ t('about.title') }}</h1>
       </div>
     </div>
 
@@ -33,7 +33,7 @@
             class="flex items-center gap-2"
           >
             <AcademicCapIcon class="h-4 w-4" />
-            平台介绍
+            {{ t('nav.about') }}
           </RouterLink>
         </li>
         <li>
@@ -42,7 +42,7 @@
             class="flex items-center gap-2"
           >
             <ChartBarIcon class="h-4 w-4" />
-            数据概览
+            {{ t('nav.overview') }}
           </RouterLink>
         </li>
         <li>
@@ -51,7 +51,7 @@
             class="flex items-center gap-2"
           >
             <AdjustmentsHorizontalIcon class="h-4 w-4" />
-            多维筛选
+            {{ t('nav.filters') }}
           </RouterLink>
         </li>
       </ul>
@@ -64,18 +64,22 @@
         <div class="flex items-center space-x-1">
           <div class="stats stats-horizontal shadow bg-base-200">
             <div class="stat py-2 px-3">
-              <div class="stat-title text-xs">数据总量</div>
+              <div class="stat-title text-xs">{{ t('nav.total') }}</div>
               <div class="stat-value text-sm">{{ totalCount }}</div>
             </div>
             <div class="stat py-2 px-3">
-              <div class="stat-title text-xs">状态</div>
-              <div class="stat-value text-xs" :class="statusClass">{{ dataStatus }}</div>
+              <div class="stat-title text-xs">{{ t('nav.data_f_count') }}</div>
+              <div class="stat-value text-sm">{{ biblio.filteredData?.length ?? 0 }}</div>
+            </div>
+            <div class="stat py-2 px-3">
+              <div class="stat-title text-xs">{{ t('nav.status') }}</div>
+              <div class="stat-value text-xs" :class="statusClass">{{ t('nav.' + dataStatus) }}</div>
             </div>
           </div>
         </div>
 
         <!-- 重新加载数据 -->
-        <button 
+        <button
           class="btn btn-ghost btn-sm"
           @click="reloadData"
           :disabled="isLoading"
@@ -83,20 +87,49 @@
           <ArrowPathIcon class="h-4 w-4" :class="{ 'animate-spin': isLoading }" />
         </button>
 
-        <!-- 主题切换 -->
-        <div class="dropdown dropdown-end">
-          <div tabindex="0" role="button" class="btn btn-ghost btn-sm">
-            <MoonIcon class="h-4 w-4" />
-          </div>
-          <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
-            <li><a @click="setTheme('light')">浅色主题</a></li>
-            <li><a @click="setTheme('dark')">深色主题</a></li>
-            <li><a @click="setTheme('cupcake')">Cupcake</a></li>
-            <li><a @click="setTheme('bumblebee')">Bumblebee</a></li>
-            <li><a @click="setTheme('emerald')">Emerald</a></li>
-            <li><a @click="setTheme('corporate')">Corporate</a></li>
-          </ul>
+        <!-- 语言切换（地区图标下拉） -->
+        <div class="dropdown dropdown-end" :class="{ 'dropdown-open': langDropdownOpen }">
+          <label tabindex="0" class="btn btn-ghost btn-sm" aria-label="切换语言" @click="langDropdownOpen = !langDropdownOpen" @keydown.enter.prevent="langDropdownOpen = !langDropdownOpen">
+            <GlobeAltIcon class="h-4 w-4" />
+          </label>
+          <transition name="fade-modal">
+            <ul v-if="langDropdownOpen" tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-28" @keydown.esc="langDropdownOpen = false">
+              <li>
+                <label
+                  @click="handleLangSelect('zh')"
+                  :class="['lang-select-label flex items-center gap-2', { active: currentLang === 'zh' }]"
+                  aria-checked="currentLang === 'zh'"
+                  role="menuitemradio"
+                  tabindex="0"
+                >
+                  <span v-if="currentLang === 'zh'" class="text-primary"><svg width="16" height="16" fill="none"><path d="M4 8.5l3 3 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                  中文
+                </label>
+              </li>
+              <li>
+                <label
+                  @click="handleLangSelect('en')"
+                  :class="['lang-select-label flex items-center gap-2', { active: currentLang === 'en' }]"
+                  aria-checked="currentLang === 'en'"
+                  role="menuitemradio"
+                  tabindex="0"
+                >
+                  <span v-if="currentLang === 'en'" class="text-primary"><svg width="16" height="16" fill="none"><path d="M4 8.5l3 3 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                  English
+                </label>
+              </li>
+            </ul>
+          </transition>
         </div>
+
+        <!-- 主题切换 -->
+        <button
+          class="btn btn-ghost btn-sm"
+          @click="toggleTheme"
+          :aria-label="currentTheme === 'dark' ? '切换为浅色主题' : '切换为深色主题'"
+        >
+          <component :is="currentTheme === 'dark' ? SunIcon : MoonIcon" class="h-4 w-4" />
+        </button>
       </div>
     </div>
   </div>
@@ -110,17 +143,16 @@
       </div>
     </div>
   </Transition>
-
-  <!-- 错误状态提示 -->
-  <!-- 顶部报错弹窗已移除，统一由全局 ErrorModal 控制 -->
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 import { useBiblio } from '../stores/biblioStore'
-import { ChartBarIcon, AdjustmentsHorizontalIcon, BoltIcon, Bars3Icon, AcademicCapIcon, ArrowPathIcon, MoonIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
+import { ChartBarIcon, AdjustmentsHorizontalIcon, Bars3Icon, AcademicCapIcon, ArrowPathIcon, MoonIcon, SunIcon, ExclamationTriangleIcon, GlobeAltIcon } from '@heroicons/vue/24/outline'
+import { useI18n } from 'vue-i18n'
 
 const biblio = useBiblio()
+const { t, locale } = useI18n()
 
 // 计算属性
 const isLoading = computed(() => biblio.loading)
@@ -128,10 +160,10 @@ const error = computed(() => biblio.error)
 const totalCount = computed(() => biblio.data?.length || 0)
 
 const dataStatus = computed(() => {
-  if (isLoading.value) return '加载中'
-  if (error.value) return '错误'
-  if (totalCount.value > 0) return '就绪'
-  return '无数据'
+  if (isLoading.value) return 'loading'
+  if (error.value) return 'error'
+  if (totalCount.value > 0) return 'ready'
+  return 'nodata'
 })
 
 const statusClass = computed(() => {
@@ -150,15 +182,51 @@ const clearError = () => {
   biblio.error = null
 }
 
+const currentTheme = ref('light')
+const currentLang = ref(localStorage.getItem('lang') || 'zh')
+
+// 语言下拉菜单控制
+const langDropdownOpen = ref(false)
+
 const setTheme = (theme) => {
   document.documentElement.setAttribute('data-theme', theme)
   localStorage.setItem('theme', theme)
+  currentTheme.value = theme
 }
 
-// 初始化主题
+const toggleTheme = () => {
+  const next = currentTheme.value === 'dark' ? 'light' : 'dark'
+  setTheme(next)
+}
+
+// 切换语言并关闭下拉
+const handleLangSelect = (lang) => {
+  currentLang.value = lang
+  localStorage.setItem('lang', lang)
+  locale.value = lang
+  langDropdownOpen.value = false
+  window.dispatchEvent(new Event('langchange'))
+}
+
+// 点击外部关闭下拉
+const handleClickOutside = (e) => {
+  const dropdown = document.querySelector('.dropdown-end')
+  if (dropdown && !dropdown.contains(e.target)) {
+    langDropdownOpen.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
+
 const initTheme = () => {
   const savedTheme = localStorage.getItem('theme') || 'light'
   document.documentElement.setAttribute('data-theme', savedTheme)
+  currentTheme.value = savedTheme
 }
 
 // 组件挂载时初始化主题
@@ -169,6 +237,28 @@ initTheme()
 .menu li > a.router-link-active {
   @apply bg-primary text-primary-content;
 }
+.menu li > a.active {
+  @apply bg-primary text-primary-content;
+}
+
+.lang-select-label {
+  @apply rounded-full px-3 py-1 transition-colors duration-150 cursor-pointer;
+  background: transparent;
+  color: #6366f1;
+  font-weight: 500;
+}
+.lang-select-label.active {
+  background: transparent;
+  color: #4f46e5;
+  font-weight: 700;
+  box-shadow: none;
+  text-decoration: underline;
+}
+.lang-select-label:hover:not(.active) {
+  background: transparent;
+  color: #6366f1;
+  text-decoration: underline;
+}
 
 .fade-modal-enter-active,
 .fade-modal-leave-active {
@@ -177,6 +267,18 @@ initTheme()
 .fade-modal-enter-from,
 .fade-modal-leave-to {
   opacity: 0;
+}
+
+/* 语言下拉动画 */
+.dropdown-content {
+  transition: opacity 0.18s cubic-bezier(0.4,0,0.2,1), transform 0.18s cubic-bezier(0.4,0,0.2,1);
+  opacity: 1;
+  transform: translateY(0);
+}
+.fade-modal-enter-from .dropdown-content,
+.fade-modal-leave-to .dropdown-content {
+  opacity: 0;
+  transform: translateY(-8px);
 }
 
 .stats {

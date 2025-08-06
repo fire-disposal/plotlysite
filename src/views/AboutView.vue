@@ -3,28 +3,39 @@
     <div class="absolute animate-float-slow left-[-60px] top-[-60px] w-40 h-40 bg-primary opacity-10 rounded-full blur-2xl"></div>
     <div class="absolute animate-float-fast right-[-40px] bottom-[-40px] w-32 h-32 bg-secondary opacity-10 rounded-full blur-2xl"></div>
     <div class="z-10 text-center">
-      <h1 class="text-5xl font-extrabold text-primary drop-shadow mb-4 animate-fade-in">文献计量学分析平台</h1>
+      <h1 class="text-5xl font-extrabold text-primary drop-shadow mb-4 animate-fade-in">{{ t('about.title') }}</h1>
       <p class="text-lg text-base-content/80 mb-6 animate-fade-in-delay">
-        探索和分析医学影像深度学习文献的综合平台。<br>
-        基于文献计量学数据，提供多维度的研究洞察和可视化分析。
+        {{ t('about.desc1') }}<br>
+        {{ t('about.desc2') }}
       </p>
       <div class="flex flex-wrap justify-center gap-4 mt-6">
         <div class="feature-card animate-fade-in-delay2">
           <span class="icon text-3xl">📊</span>
-          <div class="title">多维数据可视化</div>
+          <div class="title">{{ t('about.feature1') }}</div>
         </div>
         <div class="feature-card animate-fade-in-delay3">
           <span class="icon text-3xl">🔎</span>
-          <div class="title">智能筛选与检索</div>
+          <div class="title">{{ t('about.feature2') }}</div>
         </div>
         <div class="feature-card animate-fade-in-delay4">
           <span class="icon text-3xl">✨</span>
-          <div class="title">高质量研究洞察</div>
+          <div class="title">{{ t('about.feature3') }}</div>
         </div>
       </div>
     </div>
+    <router-link
+      to="/overview"
+      class="mt-8 inline-block px-8 py-3 bg-primary text-white font-bold rounded-lg shadow-lg hover:bg-primary/90 transition animate-fade-in-delay4"
+    >
+      立刻开始
+    </router-link>
   </div>
 </template>
+
+<script setup>
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
+</script>
 
 <style scoped>
 .about-hero {
