@@ -27,7 +27,7 @@
       to="/overview"
       class="mt-8 inline-block px-8 py-3 bg-primary text-white font-bold rounded-lg shadow-lg hover:bg-primary/90 transition animate-fade-in-delay4"
     >
-      立刻开始
+      {{ t('about.start') }}
     </router-link>
   </div>
 </template>

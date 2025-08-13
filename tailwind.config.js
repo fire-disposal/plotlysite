@@ -9,4 +9,15 @@ export default {
   plugins: [
     daisyui,
   ],
+  daisyui: {
+    themes: [
+      {
+        mytheme: {
+          primary: "#469DEFFF",
+          "base-100": "#ffffff",
+          "base-content": "#222222"
+        }
+      }
+    ]
+  },
 }

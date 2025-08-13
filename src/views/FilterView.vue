@@ -1,343 +1,292 @@
 <template>
-  <div class="p-6 space-y-6">
-    <!-- 顶部三栏筛选区 -->
-    <div class="grid gap-4 lg:grid-cols-[1.2fr_1fr_1.2fr] items-start">
-      <!-- 左侧：标题和统计卡 -->
-      <div class="flex flex-col justify-between bg-base-200 rounded-xl p-5 space-y-4 shadow">
+  <div class="flex flex-col gap-8 p-6">
+    <!-- 顶部统计卡片区 -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="bg-white rounded-xl shadow p-5 flex flex-col items-center">
+        <div class="text-lg font-bold mb-2">原始数据</div>
+        <div class="text-3xl font-mono text-primary">{{ totalCount }}</div>
+      </div>
+      <div class="bg-white rounded-xl shadow p-5 flex flex-col items-center">
+        <div class="text-lg font-bold mb-2">筛选结果</div>
+        <div class="text-3xl font-mono text-success">{{ filteredCount }}</div>
+      </div>
+      <div class="bg-white rounded-xl shadow p-5 flex flex-col items-center">
+        <div class="text-lg font-bold mb-2">筛选率</div>
+        <div class="text-3xl font-mono text-info">{{ filterRate }}%</div>
+      </div>
+    </div>
+
+    <!-- 筛选入口区 -->
+    <div class="flex flex-wrap gap-4 items-center">
+      <div class="flex gap-2">
+        <button
+          v-for="preset in presets"
+          :key="preset.key"
+          class="btn btn-sm"
+          :class="activePreset === preset.key ? 'btn-primary' : 'btn-outline'"
+          @click="applyPreset(preset.key)"
+        >
+          <span class="mr-1">{{ preset.icon }}</span>{{ preset.label }}
+        </button>
+      </div>
+      <button class="btn btn-sm btn-warning" v-if="hasActiveFilters" @click="clearAllFilters">
+        清除所有筛选
+      </button>
+    </div>
+
+    <!-- 筛选面板 -->
+    <div class="bg-base-100 rounded-xl shadow p-6 flex flex-col gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- 关键词筛选 -->
         <div>
-          <h1 class="text-2xl font-bold mb-2">多维筛选分析</h1>
-          <p class="text-sm text-base-content/80">
-            通过多个维度对文献计量学数据进行精确筛选，深入挖掘研究模式和趋势。
-          </p>
+          <div class="font-bold mb-2">关键词</div>
+          <input
+            v-model="keywordsInput"
+            class="input input-bordered w-full"
+            placeholder="输入关键词，逗号分隔"
+            @keyup.enter="applyFilter"
+          />
         </div>
-        <div class="stats stats-horizontal bg-base-100 shadow rounded-lg">
-          <div class="stat">
-            <div class="stat-title">原始数据</div>
-            <div class="stat-value text-sm">{{ totalCount }}</div>
+        <!-- 数值筛选 -->
+        <div>
+          <div class="font-bold mb-2">数值字段</div>
+          <div v-for="(num, idx) in numericFilters" :key="idx" class="flex gap-2 mb-2">
+            <select v-model="num.field" class="select select-bordered w-28">
+              <option v-for="field in numericFields" :key="field" :value="field">{{ field }}</option>
+            </select>
+            <input v-model.number="num.min" type="number" class="input input-bordered w-16" placeholder="最小值" />
+            <input v-model.number="num.max" type="number" class="input input-bordered w-16" placeholder="最大值" />
+            <button class="btn btn-xs btn-error" @click="removeNumeric(idx)">删除</button>
           </div>
-          <div class="stat">
-            <div class="stat-title">筛选结果</div>
-            <div class="stat-value text-sm text-primary">
-              {{ filteredCount }}
-            </div>
-          </div>
-          <div class="stat">
-            <div class="stat-title">筛选率</div>
-            <div class="stat-value text-sm">{{ filterRate }}%</div>
-          </div>
+          <button class="btn btn-xs btn-outline" @click="addNumeric">添加数值筛选</button>
         </div>
-      </div>
-
-      <!-- 中间：快速筛选 -->
-      <div class="bg-base-100 shadow rounded-xl p-5 flex flex-col justify-between space-y-2">
-        <h2 class="card-title text-base mb-2 flex items-center">
-          <BoltIcon class="h-5 w-5 mr-2" />
-          快速筛选
-        </h2>
-        <div class="flex flex-wrap gap-2">
-          <button
-            class="btn btn-xs"
-            :class="hasActiveFilters ? 'btn-warning' : 'btn-outline'"
-            @click="clearAllFilters"
-          >
-            <TrashIcon class="h-4 w-4 mr-1" />
-            清除所有筛选
-          </button>
-          <button class="btn btn-xs btn-outline" @click="applyPreset('highQuality')">
-            <StarIcon class="h-4 w-4 mr-1" />
-            高质量研究
-          </button>
-          <button class="btn btn-xs btn-outline" @click="applyPreset('highPerformance')">
-            <ChartBarIcon class="h-4 w-4 mr-1" />
-            高性能模型
-          </button>
-          <button class="btn btn-xs btn-outline" @click="applyPreset('openData')">
-            <CloudArrowUpIcon class="h-4 w-4 mr-1" />
-            开放数据
-          </button>
-          <button class="btn btn-xs btn-outline" @click="applyPreset('recent')">
-            <ChartPieIcon class="h-4 w-4 mr-1" />
-            近期研究
-          </button>
+        <!-- 条件筛选 -->
+        <div>
+          <div class="font-bold mb-2">条件字段</div>
+          <div v-for="(cond, idx) in conditionFilters" :key="idx" class="flex gap-2 mb-2">
+            <select v-model="cond.field" class="select select-bordered w-28">
+              <option v-for="field in conditionFields" :key="field" :value="field">{{ field }}</option>
+            </select>
+            <input v-model="cond.valuesStr" class="input input-bordered w-28" placeholder="匹配值，逗号分隔" />
+            <button class="btn btn-xs btn-error" @click="removeCondition(idx)">删除</button>
+          </div>
+          <button class="btn btn-xs btn-outline" @click="addCondition">添加条件筛选</button>
         </div>
       </div>
-
-      <!-- 右侧：筛选状态 -->
-      <div v-if="hasActiveFilters" class="bg-base-100 shadow rounded-xl p-5 space-y-2">
-        <h3 class="card-title text-sm flex items-center mb-1">
-          <AdjustmentsHorizontalIcon class="h-5 w-5 mr-2" />
-          当前筛选条件
-        </h3>
-        <div class="flex flex-wrap gap-2">
-          <!-- 动态标签展示 -->
-          <template v-for="type in filters.networkType" :key="`network-${type}`">
-            <div class="badge badge-primary gap-2">
-              网络: {{ type }}
-              <button @click="removeFilter('networkType', type)" class="btn btn-ghost btn-xs">×</button>
-            </div>
-          </template>
-          <template v-for="type in filters.cancerType" :key="`cancer-${type}`">
-            <div class="badge badge-secondary gap-2">
-              癌症: {{ type }}
-              <button @click="removeFilter('cancerType', type)" class="btn btn-ghost btn-xs">×</button>
-            </div>
-          </template>
-          <template v-for="tech in filters.dataCollectionTech" :key="`tech-${tech}`">
-            <div class="badge badge-accent gap-2">
-              技术: {{ tech }}
-              <button @click="removeFilter('dataCollectionTech', tech)" class="btn btn-ghost btn-xs">×</button>
-            </div>
-          </template>
-          <div v-if="filters.hasExternalValidation !== null" class="badge badge-info gap-2">
-            外部验证: {{ filters.hasExternalValidation ? "是" : "否" }}
-            <button @click="removeFilter('hasExternalValidation', null)" class="btn btn-ghost btn-xs">×</button>
-          </div>
-          <div v-if="filters.hasCodeAvailability !== null" class="badge badge-success gap-2">
-            代码开放: {{ filters.hasCodeAvailability ? "是" : "否" }}
-            <button @click="removeFilter('hasCodeAvailability', null)" class="btn btn-ghost btn-xs">×</button>
-          </div>
-          <div v-if="filters.hasDataAvailability !== null" class="badge badge-warning gap-2">
-            数据开放: {{ filters.hasDataAvailability ? "是" : "否" }}
-            <button @click="removeFilter('hasDataAvailability', null)" class="btn btn-ghost btn-xs">×</button>
-          </div>
-        </div>
+      <div class="flex justify-end">
+        <button class="btn btn-primary" @click="applyFilter">应用筛选</button>
       </div>
     </div>
 
-    <!-- 主筛选面板 -->
-    <div class="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-6">
-      <!-- 基础属性筛选卡片 -->
-      <BasicFilterPanel
-        :filters="filters"
-        :network-types="networkTypes"
-        :cancer-types="cancerTypes"
-        :data-techniques="dataCollectionTechniques"
-        @toggle-filter="toggleFilter"
-      />
-
-      <!-- 性能与布尔筛选卡片 -->
-      <AdvancedFilterPanel
-        :filters="filters"
-        @update-performance="updatePerformanceRange"
-        @update-quality="updateQualityRange"
-        @set-boolean="setFilter"
-      />
+    <!-- 当前筛选状态标签区 -->
+    <div v-if="hasActiveFilters" class="flex flex-wrap gap-2">
+      <span
+        v-for="kw in keywordsInput.split(',').map(s => s.trim()).filter(Boolean)"
+        :key="`kw-${kw}`"
+        class="badge badge-primary gap-2"
+      >
+        关键词: {{ kw }}
+      </span>
+      <span
+        v-for="(num, idx) in numericFilters"
+        :key="`num-${idx}`"
+        class="badge badge-info gap-2"
+      >
+        {{ num.field }}: {{ num.min }} ~ {{ num.max }}
+      </span>
+      <span
+        v-for="(cond, idx) in conditionFilters"
+        :key="`cond-${idx}`"
+        class="badge badge-secondary gap-2"
+      >
+        {{ cond.field }}: {{ cond.valuesStr }}
+      </span>
     </div>
 
-    <!-- 筛选结果展示区 -->
-    <div class="card bg-base-100 shadow-xl">
-      <div class="card-body space-y-4">
-        <h2 class="card-title">
-          <DocumentChartBarIcon class="h-6 w-6" />
-          筛选结果
-          <div class="badge badge-primary ml-2">{{ filteredCount }} 篇</div>
-        </h2>
-
-        <div v-if="filteredCount === 0" class="alert alert-warning">
-          <ExclamationTriangleIcon class="shrink-0 h-6 w-6 text-warning" />
-          <span>没有符合当前筛选条件的文献。请调整筛选条件。</span>
-        </div>
-
-        <div v-else class="overflow-x-auto rounded-xl border border-base-300">
-          <table class="table table-zebra table-compact text-sm">
-            <thead>
-              <tr>
-                <th>标题</th>
-                <th>网络类型</th>
-                <th>癌症类型</th>
-                <th>AUC</th>
-                <th>质量评分</th>
-                <th>发表日期</th>
-                <th>操作</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="paper in paginatedResults" :key="paper.Paper_ID">
-                <td class="max-w-xs truncate font-medium" :title="paper.title">{{ paper.title }}</td>
-                <td><div class="badge badge-outline badge-sm">{{ paper.network_type }}</div></td>
-                <td class="max-w-xs truncate">{{ paper.cancer_type }}</td>
-                <td>
-                  <div class="flex items-center space-x-1">
-                    <span class="font-mono text-sm">{{ parseFloat(paper.performance_auc).toFixed(3) }}</span>
-                    <div class="badge badge-xs" :class="getPerformanceClass(paper.performance_auc)"></div>
-                  </div>
-                </td>
-                <td>
-                  <div class="badge badge-sm" :class="`quality-score-${paper.q_score}`">
-                    {{ paper.q_score }}/7
-                  </div>
-                </td>
-                <td class="text-sm">{{ formatDate(paper.article_date) }}</td>
-                <td>
-                  <div class="flex space-x-1">
-                    <button class="btn btn-ghost btn-xs" @click="viewDetails(paper)" title="查看详情">
-                      <EyeIcon class="h-3 w-3" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+    <!-- 结果表格区 -->
+    <div class="bg-base-100 rounded-xl shadow-xl p-6">
+      <div class="flex items-center mb-4">
+        <span class="card-title text-lg">筛选结果</span>
+        <span class="badge badge-primary ml-2">{{ filteredCount }} 篇</span>
+      </div>
+      <div v-if="filteredCount === 0" class="alert alert-warning flex items-center gap-2">
+        <span class="material-icons text-warning">warning</span>
+        <span>没有符合当前筛选条件的文献。请调整筛选条件。</span>
+      </div>
+      <div v-else class="overflow-x-auto rounded-xl border border-base-300">
+        <table class="table table-zebra table-compact text-sm">
+          <thead>
+            <tr>
+              <th>标题</th>
+              <th>网络类型</th>
+              <th>癌症类型</th>
+              <th>AUC</th>
+              <th>质量评分</th>
+              <th>发表日期</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="paper in paginatedResults" :key="paper.Paper_ID">
+              <td class="max-w-xs truncate font-medium" :title="paper.title">{{ paper.title }}</td>
+              <td><span class="badge badge-outline badge-sm">{{ paper.network_type }}</span></td>
+              <td class="max-w-xs truncate">{{ paper.cancer_type }}</td>
+              <td>
+                <span class="font-mono text-sm">{{ parseFloat(paper.performance_auc).toFixed(3) }}</span>
+              </td>
+              <td>
+                <span class="badge badge-sm" :class="`quality-score-${paper.q_score}`">{{ paper.q_score }}/7</span>
+              </td>
+              <td class="text-sm">{{ formatDate(paper.article_date) }}</td>
+              <td>
+                <button class="btn btn-ghost btn-xs" @click="viewDetails(paper)" title="查看详情">
+                  <span class="material-icons text-base">visibility</span>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <!-- 分页控件 -->
+        <div class="flex justify-end items-center mt-4 gap-2" v-if="totalPages > 1">
+          <button class="btn btn-xs btn-outline" :disabled="currentPage === 1" @click="currentPage--">上一页</button>
+          <span class="mx-2 text-sm">第 {{ currentPage }} / {{ totalPages }} 页</span>
+          <button class="btn btn-xs btn-outline" :disabled="currentPage === totalPages" @click="currentPage++">下一页</button>
         </div>
       </div>
     </div>
   </div>
 </template>
 
-
 <script setup>
-import { computed, ref, onMounted, watch } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useBiblio } from "../stores/biblioStore";
-import {
-  TrashIcon,
-  StarIcon,
-  ChartBarIcon,
-  CloudArrowUpIcon,
-  ChartPieIcon,
-  BoltIcon,
-  AdjustmentsHorizontalIcon,
-  DocumentChartBarIcon,
-  ExclamationTriangleIcon,
-  EyeIcon
-} from "@heroicons/vue/24/outline";
+import { BIBLIO_COLUMN_DEFS } from "../stores/biblioStore";
+
+// 预设筛选项
+const presets = [
+  { key: "highQuality", label: "高质量研究", icon: "⭐" },
+  { key: "highPerformance", label: "高性能模型", icon: "📈" },
+  { key: "openData", label: "开放数据", icon: "☁️" },
+  { key: "recent", label: "近期研究", icon: "🕒" },
+];
+
+const activePreset = ref(null);
 
 const biblio = useBiblio();
-
-
-onMounted(async () => {
-  if (!globalStateManager.state.isInitialized) {
-    await globalStateManager.initializeApp();
-  }
-  if (!bibliometricsStore.data.length) {
-    await bibliometricsStore.loadData();
-  }
-});
 
 const currentPage = ref(1);
 const pageSize = 15;
 
 const totalCount = computed(() => biblio.data_count);
-
-const defaultFilters = () => ({
-  search: '',
-  networkType: [],
-  cancerType: [],
-  dataCollectionTech: [],
-  hasExternalValidation: null,
-  hasCodeAvailability: null,
-  hasDataAvailability: null,
-  performanceRange: [0, 1],
-  qualityScoreRange: [0, 7]
-});
-const filters = ref(defaultFilters());
-
-// 直接使用store的筛选结果
-const filteredList = computed(() => biblio.data_f);
 const filteredCount = computed(() => biblio.data_f_count);
 
-// 可选项直接从原始数据生成
-const networkTypes = computed(() => [...new Set(biblio.data.map(i => i.network_type).filter(Boolean))]);
-const cancerTypes = computed(() => [...new Set(biblio.data.map(i => i.cancer_type).filter(Boolean))]);
-const dataCollectionTechniques = computed(() => [...new Set(biblio.data.map(i => i.DataCollection_technique).filter(Boolean))]);
+const keywordsInput = ref("");
+const numericFilters = ref([]);
+const conditionFilters = ref([]);
 
-const filterRate = computed(() => {
-  return totalCount.value > 0 ? Math.round((filteredCount.value / totalCount.value) * 100) : 0;
-});
+// 字段列表
+const columnDefs = computed(() => biblio.columnDefs || BIBLIO_COLUMN_DEFS);
+const numericFields = computed(() =>
+  Object.entries(columnDefs.value)
+    .filter(([k, v]) => v.type === "number")
+    .map(([k]) => k)
+);
+const conditionFields = computed(() =>
+  Object.entries(columnDefs.value)
+    .filter(([k, v]) => Array.isArray(v.allowed) && v.type !== "number")
+    .map(([k]) => k)
+);
 
+// 数值筛选操作
+const addNumeric = () => {
+  numericFilters.value.push({ field: numericFields.value[0], min: 0, max: 1 });
+};
+const removeNumeric = (idx) => {
+  numericFilters.value.splice(idx, 1);
+};
+
+// 条件筛选操作
+const addCondition = () => {
+  conditionFilters.value.push({ field: conditionFields.value[0], valuesStr: "" });
+};
+const removeCondition = (idx) => {
+  conditionFilters.value.splice(idx, 1);
+};
+
+// 应用筛选
+const applyFilter = () => {
+  const keywords = keywordsInput.value.split(",").map((s) => s.trim()).filter(Boolean);
+  const numeric = numericFilters.value.map((f) => ({
+    field: f.field,
+    min: f.min,
+    max: f.max,
+  }));
+  const conditions = conditionFilters.value.map((f) => ({
+    field: f.field,
+    values: f.valuesStr.split(",").map((s) => s.trim()).filter(Boolean),
+  }));
+  biblio.applyFilters({ keywords, numeric, conditions });
+  activePreset.value = null;
+  currentPage.value = 1;
+};
+
+// 预设筛选
+const applyPreset = (type) => {
+  activePreset.value = type;
+  let preset = { keywords: [], numeric: [], conditions: [] };
+  switch (type) {
+    case "highQuality":
+      preset.numeric.push({ field: "q_score", min: 6, max: 7 });
+      break;
+    case "highPerformance":
+      preset.numeric.push({ field: "performance_auc", min: 0.85, max: 1 });
+      break;
+    case "openData":
+      preset.conditions.push({ field: "raw_data_availability", values: ["Yes", "Available", "开放"] });
+      break;
+    case "recent":
+      const recentYear = new Date().getFullYear() - 2;
+      preset.keywords.push(String(recentYear), String(recentYear + 1), String(recentYear + 2));
+      break;
+    default:
+      break;
+  }
+  biblio.applyFilters(preset);
+  keywordsInput.value = preset.keywords.join(",");
+  numericFilters.value = preset.numeric.map((n) => ({ ...n }));
+  conditionFilters.value = preset.conditions.map((c) => ({
+    field: c.field,
+    valuesStr: c.values.join(","),
+  }));
+  currentPage.value = 1;
+};
+
+// 清除所有筛选
+const clearAllFilters = () => {
+  keywordsInput.value = "";
+  numericFilters.value = [];
+  conditionFilters.value = [];
+  activePreset.value = null;
+  applyFilter();
+};
+
+// 筛选状态
 const hasActiveFilters = computed(() => {
-  const f = filters.value;
   return (
-    f.networkType.length > 0 ||
-    f.cancerType.length > 0 ||
-    f.dataCollectionTech.length > 0 ||
-    f.hasExternalValidation !== null ||
-    f.hasCodeAvailability !== null ||
-    f.hasDataAvailability !== null ||
-    f.performanceRange[0] > 0 || f.performanceRange[1] < 1 ||
-    f.qualityScoreRange[0] > 0 || f.qualityScoreRange[1] < 7
+    (keywordsInput.value && keywordsInput.value.trim() !== "") ||
+    numericFilters.value.length > 0 ||
+    conditionFilters.value.some((c) => c.valuesStr && c.valuesStr.trim() !== "")
   );
 });
 
+// 分页
 const totalPages = computed(() => Math.ceil(filteredCount.value / pageSize));
 const paginatedResults = computed(() => {
   const start = (currentPage.value - 1) * pageSize;
-  return filteredList.value.slice(start, start + pageSize);
+  return biblio.data_f.slice(start, start + pageSize);
 });
 
-/**
- * filters变化时自动应用筛选
- */
-watch(filters, () => {
-  biblio.applyFilters(filters.value);
-  currentPage.value = 1;
-}, { deep: true });
-
-/**
- * 首次加载时也应用一次筛选
- */
-onMounted(() => {
-  biblio.applyFilters(filters.value);
-});
-
-const toggleFilter = (filterType, value) => {
-  if (filters.value[filterType].includes(value)) {
-    filters.value[filterType] = filters.value[filterType].filter(v => v !== value);
-  } else {
-    filters.value[filterType] = [...filters.value[filterType], value];
-  }
-};
-
-const setFilter = (filterType, value) => {
-  filters.value[filterType] = value;
-};
-
-const removeFilter = (filterType, value) => {
-  if (Array.isArray(filters.value[filterType])) {
-    filters.value[filterType] = filters.value[filterType].filter(v => v !== value);
-  } else {
-    filters.value[filterType] = null;
-  }
-};
-
-const clearAllFilters = () => {
-  filters.value = defaultFilters();
-};
-
-const updatePerformanceRange = (value) => {
-  filters.value.performanceRange = [0, parseFloat(value)];
-};
-
-const updateQualityRange = (value) => {
-  filters.value.qualityScoreRange = [0, parseInt(value)];
-};
-
-const applyPreset = (presetType) => {
-  clearAllFilters();
-  switch (presetType) {
-    case "highQuality":
-      filters.value.qualityScoreRange = [5, 7];
-      break;
-    case "highPerformance":
-      filters.value.performanceRange = [0.85, 1];
-      break;
-    case "openData":
-      filters.value.hasDataAvailability = true;
-      filters.value.hasCodeAvailability = true;
-      break;
-    case "recent":
-      // 可扩展 recent 相关逻辑
-      break;
-  }
-};
-
-const getPerformanceClass = (auc) => {
-  const score = parseFloat(auc);
-  if (score >= 0.9) return "badge-success";
-  if (score >= 0.8) return "badge-info";
-  if (score >= 0.7) return "badge-warning";
-  return "badge-error";
-};
-
+// 日期格式化
 const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString("zh-CN", {
     year: "numeric",
@@ -345,18 +294,47 @@ const formatDate = (dateString) => {
   });
 };
 
+// 查看详情
 const viewDetails = (paper) => {
-  console.log("查看详情:", paper.title);
+  // 可扩展为弹窗预览等
+  alert(`查看详情: ${paper.title}`);
 };
+
+onMounted(() => {
+  applyFilter();
+});
 </script>
 
 <style scoped>
-.checkbox:checked,
-.radio:checked {
-  @apply border-opacity-100;
+.badge-primary {
+  background: #2563eb;
+  color: #fff;
 }
-.range {
-  @apply mb-2;
+.badge-info {
+  background: #06b6d4;
+  color: #fff;
 }
+.badge-secondary {
+  background: #64748b;
+  color: #fff;
+}
+.badge-success {
+  background: #22c55e;
+  color: #fff;
+}
+.badge-warning {
+  background: #f59e42;
+  color: #fff;
+}
+.badge-error {
+  background: #ef4444;
+  color: #fff;
+}
+.quality-score-7 { background: #22c55e; color: #fff; }
+.quality-score-6 { background: #a3e635; color: #fff; }
+.quality-score-5 { background: #facc15; color: #fff; }
+.quality-score-4 { background: #f59e42; color: #fff; }
+.quality-score-3 { background: #f87171; color: #fff; }
+.quality-score-2 { background: #ef4444; color: #fff; }
+.quality-score-1 { background: #991b1b; color: #fff; }
 </style>
-

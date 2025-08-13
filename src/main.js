@@ -31,7 +31,8 @@ const messages = {
       desc2: '基于文献计量学数据，提供多维度的研究洞察和可视化分析。',
       feature1: '多维数据可视化',
       feature2: '智能筛选与检索',
-      feature3: '高质量研究洞察'
+      feature3: '高质量研究洞察',
+      start: '立刻开始'
     }
   },
   en: {
@@ -58,7 +59,8 @@ const messages = {
       desc2: 'Based on bibliometric data, providing multidimensional research insights and visual analytics.',
       feature1: 'Multidimensional Data Visualization',
       feature2: 'Intelligent Filtering & Retrieval',
-      feature3: 'High-Quality Research Insights'
+      feature3: 'High-Quality Research Insights',
+      start: 'Get Started'
     }
   }
 };

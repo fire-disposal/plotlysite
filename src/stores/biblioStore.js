@@ -4,6 +4,24 @@ import { fetchCSV } from '../utils/csv'
 import * as Statistics from '../utils/statistics'
 import _ from 'lodash'
 
+/**
+ * 字段类型定义（全局暴露，便于筛选面板动态获取）
+ */
+const BIBLIO_COLUMN_DEFS = {
+  'Paper_ID': { required: true, type: 'string' },
+  'title': { required: true, type: 'string' },
+  'article_date': { required: true, type: 'string' },
+  'network_type': { required: true, type: 'string', allowed: ['CNN', 'RNN', 'Transformer', 'Other'] },
+  'cancer_type': { required: true, type: 'string' },
+  'DataCollection_technique': { required: false, type: 'string', allowed: ['WGS', 'WES', 'RNA-seq', 'Other'] },
+  'external_val_set': { required: false, type: 'string', allowed: ['1', '0', 'yes', 'no'] },
+  'code_availability': { required: false, type: 'string', allowed: ['1', '0', 'yes', 'no'] },
+  'raw_data_availability': { required: false, type: 'string', allowed: ['yes', 'no'] },
+  'performance_auc': { required: false, type: 'number' },
+  'q_score': { required: false, type: 'number', allowed: [0,1,2,3,4,5,6,7] }
+};
+export { BIBLIO_COLUMN_DEFS };
+
 export const useBiblio = defineStore('biblio', () => {
   // 数据
   const data = ref([])
@@ -30,59 +48,53 @@ export const useBiblio = defineStore('biblio', () => {
 
   // 新增：筛选逻辑
   // 现在接收filters参数，由页面传入
+  /**
+   * 新版自由筛选算法
+   * 支持：关键词模糊匹配、数值字段范围筛选、任意字段条件组合
+   * 筛选条件结构示例：
+   * {
+   *   keywords: ['xxx', 'yyy'],
+   *   numeric: [{ field: 'performance_auc', min: 0.8, max: 1 }],
+   *   conditions: [{ field: 'network_type', values: ['CNN', 'RNN'] }]
+   * }
+   */
   const applyFilters = (f) => {
     let result = [...data.value]
-    if (f.search) {
-      const searchTerm = f.search.toLowerCase()
+
+    // 关键词模糊匹配
+    if (f.keywords && f.keywords.length > 0) {
+      const kwArr = f.keywords.map(k => k.toLowerCase())
       result = result.filter(item =>
-        Object.values(item).some(v => String(v).toLowerCase().includes(searchTerm))
+        kwArr.some(kw =>
+          Object.values(item).some(v => String(v).toLowerCase().includes(kw))
+        )
       )
     }
-    if (f.networkType.length > 0) {
-      result = result.filter(item => f.networkType.includes(item.network_type))
-    }
-    if (f.cancerType.length > 0) {
-      result = result.filter(item => {
-        if (!item.cancer_type) return false
-        const itemCancers = item.cancer_type.split(',').map(c => c.trim())
-        return f.cancerType.some(filterCancer =>
-          itemCancers.some(itemCancer => itemCancer.includes(filterCancer))
-        )
+
+    // 数值字段范围筛选
+    if (f.numeric && Array.isArray(f.numeric)) {
+      f.numeric.forEach(cond => {
+        result = result.filter(item => {
+          const val = parseFloat(item[cond.field])
+          if (isNaN(val)) return false
+          return val >= cond.min && val <= cond.max
+        })
       })
     }
-    if (f.dataCollectionTech.length > 0) {
-      result = result.filter(item => f.dataCollectionTech.includes(item.DataCollection_technique))
-    }
-    if (f.hasExternalValidation !== null) {
-      result = result.filter(item => {
-        const hasExternal = item.external_val_set === '1' || item.external_val_set === 'yes'
-        return hasExternal === f.hasExternalValidation
+
+    // 任意字段条件组合（枚举/精确匹配）
+    if (f.conditions && Array.isArray(f.conditions)) {
+      f.conditions.forEach(cond => {
+        result = result.filter(item => cond.values.includes(item[cond.field]))
       })
     }
-    if (f.hasCodeAvailability !== null) {
-      result = result.filter(item => {
-        const hasCode = item.code_availability === '1' || item.code_availability === 'yes'
-        return hasCode === f.hasCodeAvailability
-      })
-    }
-    if (f.hasDataAvailability !== null) {
-      result = result.filter(item => {
-        const hasData = item.raw_data_availability === 'yes'
-        return hasData === f.hasDataAvailability
-      })
-    }
-    if (f.performanceRange[1] < 1) {
-      result = result.filter(item => {
-        const auc = parseFloat(item.performance_auc) || 0
-        return auc >= f.performanceRange[0] && auc <= f.performanceRange[1]
-      })
-    }
-    if (f.qualityScoreRange[1] < 7) {
-      result = result.filter(item => {
-        const score = item.q_score || 0
-        return score >= f.qualityScoreRange[0] && score <= f.qualityScoreRange[1]
-      })
-    }
+
+    // 允许自定义扩展其他类型筛选
+    // TODO: 可扩展更多类型
+
+    // 性能优化：大数据量时可用 _.filter 或 Web Worker
+    // result = _.filter(result, ...)
+
     data_f.value = result
     data_f_count.value = result.length
   }
@@ -99,30 +111,21 @@ export const useBiblio = defineStore('biblio', () => {
       const loadedData = await fetchCSV(csvPath)
       data.value = loadedData.map(row => {
         // 检查CSV列名与允许值
-        const COLUMN_DEFS = {
-          'Paper_ID': { required: true },
-          'title': { required: true },
-          'article_date': { required: true, type: 'string' },
-          'network_type': { required: true, allowed: ['CNN', 'RNN', 'Transformer', 'Other'] },
-          'cancer_type': { required: true },
-          'DataCollection_technique': { required: false, allowed: ['WGS', 'WES', 'RNA-seq', 'Other'] },
-          'external_val_set': { required: false, allowed: ['1', '0', 'yes', 'no'] },
-          'code_availability': { required: false, allowed: ['1', '0', 'yes', 'no'] },
-          'raw_data_availability': { required: false, allowed: ['yes', 'no'] },
-          'performance_auc': { required: false, type: 'number' },
-          'q_score': { required: false, type: 'number', allowed: [0,1,2,3,4,5,6,7] }
-        }
-        // 检查列名
         const csvColumns = Object.keys(row)
-        for (const col in COLUMN_DEFS) {
-          if (COLUMN_DEFS[col].required && !csvColumns.includes(col)) {
-            throw new Error(`缺少必需列: ${col}`)
+        for (const col in BIBLIO_COLUMN_DEFS) {
+          if (BIBLIO_COLUMN_DEFS[col].required && !csvColumns.includes(col)) {
+            // 多语言支持
+            const messages = {
+              zh: `缺少必需列: ${col}`,
+              en: `Missing required column: ${col}`
+            }
+            throw new Error(messages[import.meta.env.LOCALE || 'zh'] || messages.zh)
           }
         }
         // 检查允许值
         // 宽松化：仅校验必需列，不校验 allowed 值
         return row
-      })
+      });
       // 统计信息
       data_count.value = data.value.length
       availableYears.value = [...new Set(data.value.map(i => i.article_date?.slice(0,4)).filter(Boolean))]
@@ -131,7 +134,12 @@ export const useBiblio = defineStore('biblio', () => {
       const dates = data.value.map(i => i.article_date).filter(Boolean).sort()
       updatedDate.value = dates.length ? dates[dates.length - 1] : ''
     } catch (err) {
-      error.value = err.message
+      // 多语言错误处理
+      const messages = {
+        zh: err.message,
+        en: err.message // 若后续有更多错误类型可扩展
+      }
+      error.value = messages[import.meta.env.LOCALE || 'zh'] || messages.zh
     } finally {
       loading.value = false
     }
@@ -154,6 +162,8 @@ export const useBiblio = defineStore('biblio', () => {
     availableYears,
     availableCancerTypes,
     availableNetworkTypes,
-    updatedDate
+    updatedDate,
+    // 字段类型定义暴露
+    columnDefs: BIBLIO_COLUMN_DEFS
   }
 })
