@@ -1,3 +1,122 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+:root {
+  /* 基础色 */
+  --bg-color: #ffffff;
+  --card-bg: #f5f6fa;
+  --text-color: #222222;
+  --primary-color: #469DEFFF;
+  --border-color: #e0e0e0;
+  --shadow-color: rgba(0,0,0,0.10);
+  --active-bg: rgba(25, 118, 210, 0.12);
+}
+[data-theme="dark"] {
+  --bg-color: #181818;
+  --card-bg: #20232a;
+  --text-color: #e0e6ef;
+  --primary-color: #469DEFFF;
+  --border-color: #2c2f36;
+  --shadow-color: rgba(0,0,0,0.32);
+  --active-bg: rgba(70,157,239,0.18);
+}
+body {
+  background: var(--bg-color);
+  color: var(--text-color);
+  transition: background 0.3s, color 0.3s;
+  overflow-y: scroll;
+}
+/* 顶部导航按钮选中效果，仅保留必要特效 */
+.nav-btn {
+  color: var(--text-color) !important;
+  transition: color 0.3s;
+}
+[data-theme="dark"] .nav-btn {
+  color: #fff !important;
+}
+.nav-btn--active {
+  background: var(--active-bg) !important;
+  color: var(--primary-color) !important;
+  border-radius: 8px !important;
+  font-weight: 600;
+}
+[data-theme="dark"] .nav-btn--active {
+  background: var(--active-bg) !important;
+  color: #fff !important;
+  border-radius: 8px !important;
+  font-weight: 600;
+  box-shadow: 0 2px 8px 0 rgba(51, 157, 244, 0.12);
+}
+/* 隐藏滚动条 */
+body::-webkit-scrollbar,
+#app::-webkit-scrollbar,
+.v-main::-webkit-scrollbar,
+.v-container::-webkit-scrollbar {
+  width: 0 !important;
+  background: transparent;
+}
+body,
+#app,
+.v-main,
+.v-container {
+  scrollbar-width: none; /* Firefox */
+}
+/* Navbar 阴影 */
+.navbar-shadow {
+  box-shadow: 0 2px 12px 0 var(--shadow-color);
+  z-index: 10;
+}
+[data-theme="dark"] .navbar-shadow {
+  box-shadow: 0 2px 12px 0 var(--shadow-color);
+}
+
+
+/* 页面主背景适配深色模式 */
+.main-bg {
+  background: var(--bg-color) !important;
+  transition: background 0.3s;
+}
+[data-theme="dark"] .main-bg {
+  background: var(--bg-color) !important;
+  transition: background 0.3s;
+}
+/* 卡片统一适配深色模式 */
+.custom-card {
+  background: var(--card-bg) !important;
+  color: var(--text-color) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 2px 12px 0 var(--shadow-color);
+  border: 1px solid var(--border-color);
+  transition: background 0.3s, color 0.3s;
+}
+[data-theme="dark"] .custom-card {
+  background: var(--card-bg) !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 2px 16px 0 var(--shadow-color);
+}
+
+body {
+  background: var(--bg-color);
+}
+[data-theme="dark"] body {
+  background: var(--bg-color);
+}
+/* Navbar淡灰色底边框 */
+.navbar-border {
+  border-bottom: 1px solid var(--border-color);
+}
+[data-theme="dark"] .navbar-border {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.navbar,
+.v-app-bar,
+.v-toolbar-title,
+.v-icon {
+  color: var(--text-color) !important;
+  transition: color 0.3s;
+}
+[data-theme="dark"] .navbar,
+[data-theme="dark"] .v-app-bar,
+[data-theme="dark"] .v-toolbar-title,
+[data-theme="dark"] .v-icon {
+  color: #fff !important;
+}

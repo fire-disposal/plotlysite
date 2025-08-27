@@ -1,14 +1,16 @@
 // statistics.js - 统计分析与相关性
-import _ from 'lodash'
+/**
+ * 用原生 JS 替代 Lodash
+ */
 
 // 基础统计
 export function basicStats(data, field) {
   const values = data.map(item => parseFloat(item[field])).filter(val => !isNaN(val))
   if (values.length === 0) return { mean: 0, min: 0, max: 0, std: 0, count: 0 }
-  const mean = _.mean(values)
-  const min = _.min(values)
-  const max = _.max(values)
-  const std = Math.sqrt(_.mean(values.map(v => Math.pow(v - mean, 2))))
+  const mean = values.reduce((a, b) => a + b, 0) / values.length
+  const min = Math.min(...values)
+  const max = Math.max(...values)
+  const std = Math.sqrt(values.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / values.length)
   return {
     mean: Number(mean.toFixed(3)),
     min,
@@ -20,7 +22,12 @@ export function basicStats(data, field) {
 
 // 分组统计
 export function groupStats(data, groupField, valueField) {
-  const grouped = _.groupBy(data, groupField)
+  const grouped = data.reduce((acc, item) => {
+    const key = item[groupField]
+    if (!acc[key]) acc[key] = []
+    acc[key].push(item)
+    return acc
+  }, {})
   const result = {}
   Object.entries(grouped).forEach(([group, items]) => {
     result[group] = basicStats(items, valueField)
@@ -51,7 +58,9 @@ export function yearlyTrend(data, dateField = 'article_date', valueField = null)
   result.years.forEach(year => {
     result.counts[year] = yearData[year].length
     if (valueField) {
-      result.averages[year] = yearData[year].length > 0 ? _.mean(yearData[year]) : 0
+      result.averages[year] = yearData[year].length > 0
+        ? yearData[year].reduce((a, b) => a + b, 0) / yearData[year].length
+        : 0
     }
   })
   return result
@@ -61,8 +70,8 @@ export function yearlyTrend(data, dateField = 'article_date', valueField = null)
 export function distribution(data, field, bins = 10) {
   const values = data.map(item => parseFloat(item[field])).filter(val => !isNaN(val))
   if (values.length === 0) return { bins: [], counts: [] }
-  const min = _.min(values)
-  const max = _.max(values)
+  const min = Math.min(...values)
+  const max = Math.max(...values)
   const binSize = (max - min) / bins
   const binCounts = new Array(bins).fill(0)
   const binLabels = []

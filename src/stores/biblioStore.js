@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { fetchCSV } from '../utils/csv'
 import * as Statistics from '../utils/statistics'
-import _ from 'lodash'
+
 
 /**
  * 字段类型定义（全局暴露，便于筛选面板动态获取）
@@ -58,7 +58,15 @@ export const useBiblio = defineStore('biblio', () => {
    *   conditions: [{ field: 'network_type', values: ['CNN', 'RNN'] }]
    * }
    */
-  const applyFilters = (f) => {
+  const filterCache = new Map()
+  const applyFilters = async (f) => {
+    const cacheKey = JSON.stringify(f)
+    // 缓存命中直接返回
+    if (filterCache.has(cacheKey)) {
+      data_f.value = filterCache.get(cacheKey)
+      data_f_count.value = data_f.value.length
+      return
+    }
     let result = [...data.value]
 
     // 关键词模糊匹配
@@ -92,9 +100,19 @@ export const useBiblio = defineStore('biblio', () => {
     // 允许自定义扩展其他类型筛选
     // TODO: 可扩展更多类型
 
-    // 性能优化：大数据量时可用 _.filter 或 Web Worker
-    // result = _.filter(result, ...)
+    // Web Worker 入口（伪代码，需实际 worker 实现）
+    if (result.length > 5000 && window.Worker) {
+      // const worker = new Worker('filterWorker.js')
+      // worker.postMessage({ data: result, filter: f })
+      // worker.onmessage = (e) => {
+      //   data_f.value = e.data
+      //   data_f_count.value = e.data.length
+      //   filterCache.set(cacheKey, e.data)
+      // }
+      // return
+    }
 
+    filterCache.set(cacheKey, result)
     data_f.value = result
     data_f_count.value = result.length
   }

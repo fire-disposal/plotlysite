@@ -1,9 +1,11 @@
 // dataProcess.js - 数据清洗、展开、分箱、编码、评分等
-import _ from 'lodash'
+/**
+ * 用原生 JS 替代 Lodash
+ */
 
 // 数据收集技术展开
 export function expandDataCollection(data) {
-  return _.flatMap(data, row => {
+  return data.flatMap(row => {
     const techs = (row.data_collection_technology || 'None').replace(/[\[\]]/g, '').split(',').map(s => s.trim().replace(/^'+|'+$/g, ''))
     return techs.map(tech => ({
       ...row,
@@ -62,7 +64,7 @@ export function cleanColumns(data, columns) {
   ).map(row => {
     const newRow = { ...row }
     columns.forEach(col => {
-      if (_.isNumber(Number(newRow[col]))) {
+      if (!isNaN(Number(newRow[col]))) {
         newRow[col] = Number(newRow[col])
       }
     })

@@ -1,10 +1,10 @@
 <template>
-  <div class="stat bg-base-100 shadow rounded-lg flex flex-col items-center justify-center p-4">
-    <div class="stat-figure text-3xl mb-2">{{ icon }}</div>
-    <div class="stat-title text-sm opacity-60 mb-1">{{ title }}</div>
-    <div class="stat-value text-lg font-bold">{{ value }}</div>
-    <div v-if="desc" class="stat-desc text-xs mt-1 text-base-content/60">{{ desc }}</div>
-  </div>
+  <v-card class="pa-5 text-center d-flex flex-column align-center" elevation="2" style="border-radius:14px; min-width:160px; background:var(--card-bg); color:var(--text-color);">
+    <div class="mb-2" style="font-size:2.2rem; color:var(--primary-color);">{{ icon }}</div>
+    <div class="text-subtitle-1 mb-1" style="font-weight:500; color:var(--text-color);">{{ title }}</div>
+    <div class="text-h5 font-weight-bold mb-1" style="letter-spacing:1px; color:var(--primary-color);">{{ value }}</div>
+    <div v-if="desc" class="text-caption mt-1" style="color:var(--text-color);">{{ desc }}</div>
+  </v-card>
 </template>
  
 <script setup>
@@ -15,3 +15,5 @@ defineProps({
   desc: String
 })
 </script>
+
+
