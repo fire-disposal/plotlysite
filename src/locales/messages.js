@@ -25,6 +25,30 @@ export const messages = {
       feature2: '智能筛选与检索',
       feature3: '高质量研究洞察',
       start: '立刻开始'
+    },
+    filter: {
+      keyword: '关键词筛选',
+      inputKeyword: '输入关键词（逗号分隔）',
+      numeric: '数值筛选',
+      field: '字段',
+      min: '最小值',
+      max: '最大值',
+      addNumeric: '添加数值筛选',
+      condition: '条件筛选',
+      matchValue: '匹配值（逗号分隔）',
+      addCondition: '添加条件筛选',
+      apply: '应用筛选',
+      clearAll: '清除所有筛选',
+      result: '筛选结果',
+      unit: '条',
+      resultTitle: '筛选结果',
+      noData: '没有符合当前筛选条件的数据。',
+      fieldA: '字段A',
+      fieldB: '字段B',
+      fieldC: '字段C',
+      condA: '条件A',
+      condB: '条件B',
+      condC: '条件C'
     }
   },
   en: {
@@ -54,6 +78,30 @@ export const messages = {
       feature2: 'Intelligent Filtering & Retrieval',
       feature3: 'High-Quality Research Insights',
       start: 'Get Started'
+    },
+    filter: {
+      keyword: 'Keyword Filter',
+      inputKeyword: 'Enter keywords (comma separated)',
+      numeric: 'Numeric Filter',
+      field: 'Field',
+      min: 'Min',
+      max: 'Max',
+      addNumeric: 'Add Numeric Filter',
+      condition: 'Condition Filter',
+      matchValue: 'Match Values (comma separated)',
+      addCondition: 'Add Condition Filter',
+      apply: 'Apply Filter',
+      clearAll: 'Clear All Filters',
+      result: 'Filter Result',
+      unit: 'items',
+      resultTitle: 'Filter Result',
+      noData: 'No data matches the current filter.',
+      fieldA: 'Field A',
+      fieldB: 'Field B',
+      fieldC: 'Field C',
+      condA: 'Condition A',
+      condB: 'Condition B',
+      condC: 'Condition C'
     }
   }
-};
+}

@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { useError } from './useError'
 import { ref } from 'vue'
 import { fetchCSV } from '../utils/csv'
 import * as Statistics from '../utils/statistics'
@@ -158,6 +159,8 @@ export const useBiblio = defineStore('biblio', () => {
         en: err.message // 若后续有更多错误类型可扩展
       }
       error.value = messages[import.meta.env.LOCALE || 'zh'] || messages.zh
+      const errorStore = useError()
+      errorStore.setError(error.value)
     } finally {
       loading.value = false
     }

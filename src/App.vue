@@ -12,12 +12,18 @@
         </RouterView>
       </v-container>
     </v-main>
-    <LoadingModal
-      :show="isLoading"
-      message="正在加载数据..."
-      :show-delay="500"
-      :min-show-time="1000"
-    />
+    <!-- 全局错误提示 -->
+    <v-snackbar
+      v-model="errorStore.show"
+      color="error"
+      timeout="5000"
+      location="bottom right"
+    >
+      {{ errorStore.message }}
+      <template #actions>
+        <v-btn color="white" text @click="errorStore.clearError">{{ t('nav.reload') }}</v-btn>
+      </template>
+    </v-snackbar>
   </v-app>
 </template>
 
@@ -26,15 +32,20 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useBiblio } from './stores/biblioStore'
 import Navbar from './components/Navbar.vue'
-import LoadingModal from './components/LoadingModal.vue'
+import { useError } from './stores/useError'
+import { useI18n } from 'vue-i18n'
+const errorStore = useError()
+const { t, locale } = useI18n()
 
 const router = useRouter()
 const biblio = useBiblio()
 const isLoading = computed(() => biblio.loading)
+
 
 onMounted(async () => {
   if (biblio.data.length === 0) {
     await biblio.loadData()
   }
 })
+
 </script>
