@@ -17,6 +17,13 @@ export const messages = {
       lang_en: 'English',
       data_f_count: '筛选后文本'
     },
+    stat: {
+      totalPapers: '论文总数',
+      totalJournals: '期刊总数',
+      authors: '作者数',
+      countries: '国家数',
+      updatedOn: '更新时间'
+    },
     about: {
       title: '文献计量学分析平台',
       desc1: '探索和分析医学影像深度学习文献的综合平台。',
@@ -69,6 +76,13 @@ export const messages = {
       lang_zh: '中文',
       lang_en: 'English',
       data_f_count: 'Filtered Texts'
+    },
+    stat: {
+      totalPapers: 'Total papers',
+      totalJournals: 'Total journals',
+      authors: 'Authors',
+      countries: 'Countries',
+      updatedOn: 'Updated on'
     },
     about: {
       title: 'Bibliometric Analysis Platform',

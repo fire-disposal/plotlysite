@@ -2,19 +2,19 @@
   <v-container class="py-8" fluid>
       <v-row class="mb-6" justify="center">
         <v-col cols="auto">
-          <StatCard class="custom-card" title="Total papers" :value="totalCount ?? 0" icon="📄"/>
+          <StatCard class="custom-card" :title="$t('stat.totalPapers')" :value="totalCount ?? 0" icon="📄"/>
         </v-col>
         <v-col cols="auto">
-          <StatCard class="custom-card" title="Total journals" :value="availableYears?.length ?? 0" icon="📚"/>
+          <StatCard class="custom-card" :title="$t('stat.totalJournals')" :value="availableYears?.length ?? 0" icon="📚"/>
         </v-col>
         <v-col cols="auto">
-          <StatCard class="custom-card" title="Authors" :value="availableCancerTypes?.length ?? 0" icon="👨‍🔬"/>
+          <StatCard class="custom-card" :title="$t('stat.authors')" :value="availableCancerTypes?.length ?? 0" icon="👨‍🔬"/>
         </v-col>
         <v-col cols="auto">
-          <StatCard class="custom-card" title="Countries" :value="availableNetworkTypes?.length ?? 0" icon="🌍"/>
+          <StatCard class="custom-card" :title="$t('stat.countries')" :value="availableNetworkTypes?.length ?? 0" icon="🌍"/>
         </v-col>
         <v-col cols="auto">
-          <StatCard class="custom-card" title="Updated on" :value="updatedDate || ''" icon="🕒"/>
+          <StatCard class="custom-card" :title="$t('stat.updatedOn')" :value="updatedDate || ''" icon="🕒"/>
         </v-col>
       </v-row>
       <v-row>
